@@ -1,0 +1,41 @@
+.modalBox {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background-color: #202946;
+  border-radius: 20px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 11px 15px -7px, rgba(0, 0, 0, 0.14) 0px 24px 38px 3px,
+    rgba(0, 0, 0, 0.12) 0px 9px 46px 8px;
+  padding: 20px;
+
+  .close-button {
+    cursor: pointer;
+    color: white;
+  }
+
+  .deposit-form {
+    margin-bottom: 10px;
+
+    input {
+      background-color: #111931;
+      border-radius: 10px;
+      border: 1px solid #111931;
+      width: 100%;
+      padding: 15px 10px 15px 10px;
+      margin: 10px 0 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .balance {
+      color: #6c86ad;
+    }
+  }
+
+  @media (max-width: 600px) {
+    width: 300px;
+  }
+}
