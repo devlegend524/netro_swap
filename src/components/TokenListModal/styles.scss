@@ -1,0 +1,68 @@
+.tokenSelectModalBox {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background-color: #202946;
+  border-radius: 20px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 11px 15px -7px, rgba(0, 0, 0, 0.14) 0px 24px 38px 3px,
+    rgba(0, 0, 0, 0.12) 0px 9px 46px 8px;
+  padding: 20px;
+
+  .close-button {
+    cursor: pointer;
+    color: white;
+  }
+
+  .search-box {
+    width: 100%;
+    position: relative;
+
+    input {
+      background-color: #111931;
+      border-radius: 10px;
+      border: 1px solid #111931;
+      width: 100%;
+      padding: 15px 10px 15px 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .search-icon {
+      position: absolute;
+      top: 50%;
+      right: 4px;
+      transform: translate(0, -50%);
+      color: rgba(89, 81, 112, 0.34);
+      font-size: 30px;
+    }
+  }
+
+  .token-item {
+    padding: 5px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: white;
+    margin-bottom: 10px;
+
+    .token-icon {
+      width: 35px;
+      margin-right: 5px;
+    }
+
+    &.disabled {
+      filter: brightness(0.5);
+    }
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.13);
+    }
+  }
+
+  @media (max-width: 600px) {
+    width: 300px;
+  }
+}

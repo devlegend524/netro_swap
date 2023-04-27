@@ -1,0 +1,71 @@
+.farm-container {
+  margin-top: 30px;
+
+  h4 {
+    color: white;
+    text-align: center;
+  }
+
+  .wrapper {
+    border: 1px solid #273a55;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+
+    .header {
+      background: linear-gradient(
+        300.3deg,
+        rgba(69, 191, 125, 0.2) 0%,
+        rgba(85, 153, 255, 0.2) 100%
+      );
+      border-radius: 8px 8px 0 0;
+      padding: 16px;
+      position: relative;
+
+      p {
+        color: white;
+
+        &.text-right {
+          text-align: right;
+        }
+      }
+
+      .icon-group {
+        position: absolute;
+        bottom: -30px;
+        left: 50%;
+        transform: translate(-50%, 0);
+
+        img {
+          width: 48px;
+
+          &:first-child {
+            margin-right: -16px;
+            z-index: 1;
+            position: relative;
+          }
+        }
+      }
+    }
+
+    .description {
+      color: white;
+      text-align: center;
+      margin: 40px 0 15px;
+    }
+
+    .reward-detail {
+      .sub-title {
+        color: #6c86ad;
+      }
+
+      .reward-value {
+        color: white;
+      }
+    }
+
+    .button-wrapper {
+      margin-top: 0;
+    }
+  }
+}

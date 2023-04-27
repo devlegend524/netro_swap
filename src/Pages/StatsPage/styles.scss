@@ -1,0 +1,88 @@
+.content-wrapper {
+  margin: 50px 0;
+
+  h3 {
+    text-align: center;
+    font-weight: bold;
+    color: white;
+  }
+
+  h4 {
+    color: #4f8fea;
+  }
+
+  h6 {
+    font-weight: bold;
+    color: white;
+  }
+
+  .grid-wrapper {
+    background-color: #202946;
+    padding: 20px;
+    margin-top: 10px;
+    border-radius: 20px;
+
+    .down {
+      color: #fd3c99;
+    }
+
+    .up {
+      color: #2ee09a;
+    }
+
+    &.dex-ranking {
+      overflow-x: auto;
+    }
+  }
+
+  .dex-table {
+    width: 100%;
+
+    thead {
+      text-align: left;
+      color: white;
+
+      th {
+        padding-inline: 5px;
+      }
+    }
+
+    tbody {
+      tr {
+        cursor: pointer;
+        color: white;
+        border: none;
+
+        td {
+          padding-inline: 5px;
+        }
+
+        &:hover {
+          background-color: rgba(66, 75, 116, 0.14);
+        }
+      }
+
+      &.skeleton-table {
+        td {
+          padding: 10px 0;
+        }
+      }
+    }
+
+    .dex-name {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+
+      .dex-icon {
+        width: 30px;
+        border-radius: 100%;
+        margin-right: 5px;
+      }
+    }
+
+    .dex-link {
+      color: white;
+    }
+  }
+}

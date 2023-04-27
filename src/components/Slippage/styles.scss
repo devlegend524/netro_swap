@@ -1,0 +1,58 @@
+.slippageModalBox {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  background-color: #202946;
+  border-radius: 20px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 11px 15px -7px, rgba(0, 0, 0, 0.14) 0px 24px 38px 3px,
+    rgba(0, 0, 0, 0.12) 0px 9px 46px 8px;
+  padding: 20px;
+
+  .close-button {
+    cursor: pointer;
+    color: white;
+  }
+
+  h6 {
+    font-size: 16px;
+    color: #a9b6bf;
+    margin-top: 10px;
+  }
+
+  .search-box {
+    width: 100%;
+    position: relative;
+
+    input {
+      background-color: #111931;
+      border-radius: 10px;
+      border: 1px solid #111931;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      color: rgb(156, 156, 156);
+      font-weight: bold;
+    }
+
+    .set-auto {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      color: black;
+      background-color: #2ee09a;
+      padding: 1px 7px;
+      border-radius: 9px;
+      transform: translate(0, -50%);
+      cursor: pointer;
+    }
+  }
+
+  .description {
+    font-size: 14px;
+    color: #a9b6bf;
+    line-height: 17px;
+  }
+}
