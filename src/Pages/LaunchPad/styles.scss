@@ -1,0 +1,60 @@
+.launchpad {
+  color: white;
+
+  .wrapper {
+    border: 1px solid #273a55;
+    border-radius: 8px;
+
+    .header {
+      background: linear-gradient(
+        300.3deg,
+        rgba(69, 191, 125, 0.2),
+        rgba(85, 153, 255, 0.2)
+      );
+      border-radius: 8px 8px 0 0;
+      position: relative;
+      text-align: center;
+
+      .project-logo {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+      }
+    }
+
+    .progress-bar {
+      height: 14px;
+      background-color: #233253;
+      border-radius: 5px;
+
+      .progress {
+        background-color: #4a6af3;
+        height: 14px;
+        border-radius: 5px;
+        width: 70%;
+      }
+    }
+
+    input {
+      border-radius: 10px;
+      border: 1px solid #233254;
+      width: 100%;
+      padding: 10px;
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+    }
+
+    button {
+      margin-top: 5px;
+    }
+
+    .amoutn_error {
+      display: block;
+      color: rgb(241, 47, 47);
+      font-size: 12px;
+      line-height: 12px;
+    }
+  }
+}

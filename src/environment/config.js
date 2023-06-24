@@ -1,5 +1,8 @@
-export const stakingContractAddress = '0xDa56F0c1E2C213d7e6ca396716c2745Ec000Cced'
+export const stakingContractAddress =
+  '0xDa56F0c1E2C213d7e6ca396716c2745Ec000Cced'
 export const NETRO_address = '0xFc5f2B58249d31a06d2F30E69F7b7839d4b88c4a'
+export const netroPresaleContractAddress =
+  '0xfC633918BFB8C29ecB14E3Ab1dC61099C76605de'
 export const NETRO_DECIMALS = 18
 export const PROTOCOL_LIST = {
   ZKSYNC_MUTE: {
