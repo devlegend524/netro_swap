@@ -10,7 +10,11 @@
       color: #dddbf1 !important;
       font-weight: 700 !important;
       min-width: 130px;
-      background: linear-gradient(180deg, rgba(100, 102, 236, 0.8) 0%, rgba(44, 66, 192, 0.8) 100%);
+      background: linear-gradient(
+        180deg,
+        rgba(100, 102, 236, 0.8) 0%,
+        rgba(44, 66, 192, 0.8) 100%
+      );
       line-height: 20px !important;
       border-radius: 10px !important;
       padding-inline: 12px;
@@ -56,10 +60,20 @@
   }
 }
 
+#dropdown {
+  display: none;
+
+  @media (max-width: 900px) {
+    display: flex;
+  }
+}
+
 #accountMenu,
 #dropdownMenu {
   .MuiPaper-root {
     background-color: #202946 !important;
+    top: 65px !important;
+    width: 200px;
 
     ul {
       background-color: #202946;
@@ -68,11 +82,57 @@
       li {
         color: white;
         line-height: 10px;
-
         a {
           color: white;
           text-decoration: none;
         }
+
+        div {
+          button[data-testid="rk-connect-button"] {
+            color: white
+          }
+
+          button {
+            display: block;
+            background-color: transparent;
+            font-size: 16px;
+            font-family: 'Mukta';
+            border: none;
+            padding: 6px 0px;
+            cursor: pointer;
+
+            .ju367v6.ju367v9 {
+              display: none;
+            }
+
+            svg {
+              display: none;
+            }
+            div {
+              color: white;
+            }
+            div[aria-hidden='true'] {
+              display: none;
+            }
+          }
+        }
+
+        @media (min-width: 600px) {
+          height: 48px;
+        }
+
+        &:last-child {
+          display: inline-block;
+          width: 100%;
+          border-top: gray solid 1px;
+          @media (min-width: 901px) {
+            height: 90px;
+          }
+        }
+      }
+
+      @media (min-width: 600px) {
+        height: 330px;
       }
     }
   }

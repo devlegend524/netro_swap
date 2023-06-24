@@ -1,6 +1,13 @@
 import React, { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
-import { Container, Grid, Button, Menu, MenuItem } from '@mui/material'
+import {
+  Container,
+  Grid,
+  Button,
+  Menu,
+  MenuItem,
+  useMediaQuery,
+} from '@mui/material'
 import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined'
 import { Link, useLocation } from 'react-router-dom'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
@@ -21,45 +28,89 @@ const Header = () => {
 
   const mobileMenuOpen = Boolean(anchorEl1)
   const location = useLocation()
+  const matches = useMediaQuery('(min-width: 901px )')
 
   return (
     <Grid className='navbar'>
-      <Container maxWidth='xl'>
+      <Container maxWidth={'fixed'}>
         <Grid container className='header' alignItems='center'>
-          <Grid xs={4} item>
+          <Grid xs={2} sm={2} md={4} item>
             <img src={LogoImage} alt='Netro logo' className='site-logo' />
           </Grid>
-          <Grid xs={4} sx={{ display: { xs: 'none', sm: 'block' } }} item>
+          <Grid
+            xs={4}
+            md={4}
+            sx={{ display: { xs: 'none', md: 'block' } }}
+            item
+          >
             <Grid container justifyContent={'center'}>
               <Grid className='nav-group'>
                 <Link
                   to={'/swap'}
-                  className={location.pathname === '/swap' ? 'nav-link active' : 'nav-link'}
+                  className={
+                    location.pathname === '/swap'
+                      ? 'nav-link active'
+                      : 'nav-link'
+                  }
                 >
                   Swap
                 </Link>
                 <Link
                   to={'/stats'}
-                  className={location.pathname === '/stats' ? 'nav-link active' : 'nav-link'}
+                  className={
+                    location.pathname === '/stats'
+                      ? 'nav-link active'
+                      : 'nav-link'
+                  }
                 >
                   Stats
                 </Link>
                 <Link
                   to={'/farm'}
-                  className={location.pathname === '/farm' ? 'nav-link active' : 'nav-link'}
+                  className={
+                    location.pathname === '/farm'
+                      ? 'nav-link active'
+                      : 'nav-link'
+                  }
                 >
                   Farm
+                </Link>
+                <Link
+                  to={'/launchpad'}
+                  className={
+                    location.pathname === '/launchpad'
+                      ? 'nav-link active'
+                      : 'nav-link'
+                  }
+                >
+                  Launchpad
+                </Link>
+                <Link
+                  to={'/airdrop'}
+                  className={
+                    location.pathname === '/airdrop'
+                      ? 'nav-link active'
+                      : 'nav-link'
+                  }
+                >
+                  Airdrop
                 </Link>
               </Grid>
             </Grid>
           </Grid>
-          <Grid xs={8} sm={4} item>
+          <Grid xs={10} md={4} item>
             <Grid container justifyContent='flex-end' alignItems={'center'}>
-              <ConnectButton />
+              {matches && (
+                <ConnectButton
+                  showBalance={{
+                    smallScreen: false,
+                    largeScreen: true,
+                  }}
+                />
+              )}
               <Button id='dropdown'>
                 <MenuOutlinedIcon
                   className='mobile-menu'
-                  sx={{ display: { xs: 'block', sm: 'none' } }}
                   onClick={(e) => setAnchorEl1(e.target)}
                 ></MenuOutlinedIcon>
               </Button>
@@ -75,7 +126,11 @@ const Header = () => {
                 <MenuItem>
                   <Link
                     to={'/swap'}
-                    className={location.pathname === '/swap' ? 'nav-link active' : 'nav-link'}
+                    className={
+                      location.pathname === '/swap'
+                        ? 'nav-link active'
+                        : 'nav-link'
+                    }
                   >
                     Swap
                   </Link>
@@ -83,7 +138,11 @@ const Header = () => {
                 <MenuItem>
                   <Link
                     to={'/stats'}
-                    className={location.pathname === '/stats' ? 'nav-link active' : 'nav-link'}
+                    className={
+                      location.pathname === '/stats'
+                        ? 'nav-link active'
+                        : 'nav-link'
+                    }
                   >
                     Stats
                   </Link>
@@ -91,11 +150,50 @@ const Header = () => {
                 <MenuItem>
                   <Link
                     to={'/farm'}
-                    className={location.pathname === '/farm' ? 'nav-link active' : 'nav-link'}
+                    className={
+                      location.pathname === '/farm'
+                        ? 'nav-link active'
+                        : 'nav-link'
+                    }
                   >
                     Farm
                   </Link>
                 </MenuItem>
+                <MenuItem>
+                  <Link
+                    to={'/launchpad'}
+                    className={
+                      location.pathname === '/launchpad'
+                        ? 'nav-link active'
+                        : 'nav-link'
+                    }
+                  >
+                    Launchpad
+                  </Link>
+                </MenuItem>
+                <MenuItem>
+                  <Link
+                    to={'/airdrop'}
+                    className={
+                      location.pathname === '/airdrop'
+                        ? 'nav-link active'
+                        : 'nav-link'
+                    }
+                  >
+                    Airdrop
+                  </Link>
+                </MenuItem>
+                {!matches && (
+                  <MenuItem>
+                    <ConnectButton
+                      showBalance={{
+                        smallScreen: false,
+                        largeScreen: true,
+                      }}
+                      className='mobile_connect_btn'
+                    />
+                  </MenuItem>
+                )}
               </Menu>
             </Grid>
           </Grid>

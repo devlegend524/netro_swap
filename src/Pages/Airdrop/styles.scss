@@ -1,0 +1,36 @@
+.airdrop {
+  color: white;
+
+  .wrapper {
+    border: 1px solid #273a55;
+    border-radius: 8px;
+
+    .header {
+      background: linear-gradient(300.3deg, rgba(69, 191, 125, 0.2), rgba(85, 153, 255, 0.2));
+      border-radius: 8px 8px 0 0;
+      position: relative;
+    }
+
+    .label {
+      font-size: 14px;
+    }
+
+    input {
+      background-color: #233254;
+      border-radius: 10px;
+      border: 1px solid #233254;
+      width: 100%;
+      padding: 10px;
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+
+      
+    }
+  }
+}
+.Mui-error {
+  border: 1px solid red;
+  border-radius: 10px;
+}

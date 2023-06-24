@@ -8,22 +8,19 @@ import {
   Button,
   InputBase
 } from "@mui/material";
-import LoadingButton from "@mui/lab/LoadingButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import SwapCallsOutlinedIcon from "@mui/icons-material/SwapCallsOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import { useSnackbar } from "notistack";
 import { useAccount, useNetwork } from "wagmi";
 import { ethers } from "ethers";
-import { setTradeFrom, setTradeTo, initTradeInfo } from "../../redux/actions";
+import { setTradeFrom, setTradeTo } from "../../redux/actions";
 import TokenListModal from "../../components/TokenListModal";
 import ABI from "../../environment/ERC20_ABI.json";
 import Header from "../../components/Header/Header";
 import SlippageModal from "../../components/Slippage/SlippageModal";
 import { PROTOCOL_LIST } from "../../environment/config";
 import "./styles.scss";
-import defaultImg from "../../assets/erc20.png";
 
 const SwapPage = () => {
   const dispatch = useDispatch();
@@ -31,11 +28,8 @@ const SwapPage = () => {
   const { address, isConnected } = useAccount();
   const { chain } = useNetwork();
 
-  const correctNetwork =
-    chain && (chain.id === 324 || chain.id === 42161 || chain.id === 10);
+  const correctNetwork = chain && chain.id === 324;
 
-  const { enqueueSnackbar } = useSnackbar();
-  const [tokenList, setTokenList] = useState([]);
   const [pairResult, setpairResult] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [slippageModalOpen, setSlippageModalOpen] = useState(false);
@@ -49,11 +43,7 @@ const SwapPage = () => {
   const [unknownPrice, setUnknownPrice] = useState(false);
   const [liquidityError, setLiquidityError] = useState(false);
   const [estimatedGas, setEstimatedGas] = useState(0);
-  const [router, setRouter] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [txData, setTxData] = useState(null);
-  const [loadingTx, setLoadingTx] = useState(false);
-  const [allowanceError, setallowanceError] = useState(false);
+  const [bestProtocal, setBestProtocal] = useState(null);
   const [pathResults, setPathResults] = useState([]);
 
   const showModal = (key) => {
@@ -73,63 +63,53 @@ const SwapPage = () => {
       setBuyBalance("");
     } else {
       setSellBalance(value);
+      if (pairResult.length === 0) setBuyBalance("");
+      else if (pairResult[0].baseToken.symbol === tradeInfo.from.name) {
+        setBuyBalance(value * pairResult[0].priceNative);
+      } else {
+        setBuyBalance(value / pairResult[0].priceNative);
+      }
     }
   };
 
   const closeModal = () => {
     setModalOpen(false);
   };
-
   const changeBalance = () => {
     setSellBalance(buyBalance);
     calculatePrice(buyBalance);
-    setallowanceError(false);
   };
-
   const changeOrder = () => {
     setSellBalance(buyBalance);
     calculatePrice(buyBalance);
     setBalanceError(false);
     setEstimatedGas(0);
-    setallowanceError(false);
     const oldOrder = {
       ...tradeInfo
     };
-
     dispatch(setTradeFrom(oldOrder.to));
     dispatch(setTradeTo(oldOrder.from));
   };
 
-  const getRouter = async () => {
-    const API_URL = `https://api.1inch.io/v5.0/${chain.id}/approve/spender`;
-    const response = await fetch(API_URL);
-    const { address } = await response.json();
-    setRouter(address);
-  };
-
   const getQuote = async () => {
     if (sellBalance <= 0) return false;
-    if (tradeInfo.to.address === "") return false;
-    if (Number(sellBalance) > Number(balanceFrom)) return false;
-    setLoading(true);
-    const fromTokenAddress = tradeInfo.from.address;
-    const toTokenAddress = tradeInfo.to.address;
+    const fromTokenAddress = tradeInfo.from.contractAddress;
+    const toTokenAddress = tradeInfo.to.contractAddress;
     const amount = ethers.utils.parseUnits(
       sellBalance,
       tradeInfo.from.decimals
     );
 
-    const quoteAPI = `https://api.1inch.io/v5.0/${chain.id}/swap?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&fromAddress=${address}&slippage=1`;
+    const quoteAPI = `https://api.1inch.io/v5.0/324/quote?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}`;
 
     const response = await fetch(quoteAPI);
     const quoteData = await response.json();
-    setLoading(false);
     if (quoteData.statusCode === 400) {
-      if (quoteData.meta[1].type === "allowance") setallowanceError(true);
-      // setLiquidityError(true)
-      // setUnknownPrice(true)
+      setLiquidityError(true);
+      setUnknownPrice(true);
       setBuyBalance(0);
       setEstimatedGas(0);
+      setBestProtocal(null);
     } else {
       setLiquidityError(false);
       setUnknownPrice(false);
@@ -137,155 +117,66 @@ const SwapPage = () => {
         quoteData.toTokenAmount,
         quoteData.toToken.decimals
       );
-      setTxData(quoteData.tx);
       setBuyBalance(toTokenAmount);
-      setEstimatedGas(quoteData.tx.gas);
+      setEstimatedGas(quoteData.estimatedGas);
+      setBestProtocal(quoteData.protocols[0][0][0]["name"]);
     }
 
-    const pathAPI = `https://pathfinder.1inch.io/v1.4/chain/${chain.id}/router/v5/quotes?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&gasPrice=250000000&protocolWhiteList=ZKSYNC_MUTE,ZKSYNC_ONE_INCH_LIMIT_ORDER_V3,ZKSYNC_PMMX,ZKSYNC_SPACEFI,ZKSYNC_SYNCSWAP,ZKSYNC_GEM,ZKSYNC_MAVERICK_V1&preset=maxReturnResult&alternativeProtocols=ZKSYNC_MUTE,ZKSYNC_ONE_INCH_LIMIT_ORDER_V3,ZKSYNC_SPACEFI,ZKSYNC_SYNCSWAP,ZKSYNC_GEM,ZKSYNC_MAVERICK_V1`;
+    const pathAPI = `https://pathfinder.1inch.io/v1.4/chain/324/router/v5/quotes?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&gasPrice=250000000&protocolWhiteList=ZKSYNC_MUTE,ZKSYNC_ONE_INCH_LIMIT_ORDER_V3,ZKSYNC_PMMX,ZKSYNC_SPACEFI,ZKSYNC_SYNCSWAP,ZKSYNC_GEM,ZKSYNC_MAVERICK_V1&preset=maxReturnResult&alternativeProtocols=ZKSYNC_MUTE,ZKSYNC_ONE_INCH_LIMIT_ORDER_V3,ZKSYNC_SPACEFI,ZKSYNC_SYNCSWAP,ZKSYNC_GEM,ZKSYNC_MAVERICK_V1`;
 
     const pathResponse = await fetch(pathAPI);
     const pathResults = await pathResponse.json();
     if (pathResults.err) {
       setPathResults([]);
     } else {
-      setPathResults(
-        pathResults.results.sort((a, b) => {
+      const bestResult = {
+        protocol: pathResults.bestResult.routes[0].subRoutes[0][0].market.name,
+        toTokenAmount: pathResults.bestResult.toTokenAmount
+      };
+      const tempResults = pathResults.results.filter(
+        (result) => result.protocol !== bestResult.protocol
+      );
+
+      setPathResults([
+        bestResult,
+        ...tempResults.sort((a, b) => {
           return b.toTokenAmount - a.toTokenAmount;
         })
-      );
+      ]);
     }
   };
-  const addDefaultImg = (e) => {
-    e.target.src = defaultImg;
-  };
+
   const getBalance = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const balance = await provider.getBalance(address);
     setBalance(ethers.utils.formatEther(balance));
-    if (tradeInfo.from.symbol === "ETH")
+    if (tradeInfo.from.name === "ETH")
       setBalanceFrom(ethers.utils.formatEther(balance));
   };
 
   const getTokenBalance = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    if (tradeInfo.from.symbol !== "ETH") {
+    if (tradeInfo.from.name !== "ETH") {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
       const contractFrom = new ethers.Contract(
-        tradeInfo.from.address,
+        tradeInfo.from.contractAddress,
         ABI,
         provider
       );
       const decimals1 = await contractFrom.decimals();
       const balance1 = await contractFrom.balanceOf(address);
       setBalanceFrom(ethers.utils.formatUnits(balance1, decimals1));
-    }
 
-    if (tradeInfo.to.symbol !== "")
-      if (tradeInfo.to.symbol !== "ETH") {
-        console.log("to token", tradeInfo.to);
-        const contractTo = new ethers.Contract(
-          tradeInfo.to.address,
-          ABI,
-          provider
-        );
-        const decimals2 = await contractTo.decimals();
-        const balance2 = await contractTo.balanceOf(address);
-        setBalanceTo(ethers.utils.formatUnits(balance2, decimals2));
-      }
-  };
-
-  const callApprove = async () => {
-    setLoadingTx(true);
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const tokenContract = new ethers.Contract(
-      tradeInfo.from.address,
-      ABI,
-      provider
-    );
-
-    const walletSigner = provider.getSigner(address);
-    const signer = tokenContract.connect(walletSigner);
-
-    try {
-      const tx = await signer.approve(
-        router,
-        ethers.utils.parseUnits(sellBalance, tradeInfo.from.decimals)
+      const contractTo = new ethers.Contract(
+        tradeInfo.from.contractAddress,
+        ABI,
+        provider
       );
-      enqueueSnackbar(`Transaction has been submited. Tx hash: ${tx.hash}`, {
-        variant: "info",
-        autoHideDuration: 5000,
-        style: {
-          backgroundColor: "#202946"
-        }
-      });
-      const receipt = await tx.wait();
-      setLoadingTx(false);
-      enqueueSnackbar(
-        `Transaction has been confirmed. Tx hash: ${receipt.transactionHash}`,
-        {
-          variant: "info",
-          autoHideDuration: 5000,
-          style: {
-            backgroundColor: "#202946"
-          }
-        }
-      );
-      getQuote();
-    } catch (error) {
-      console.log(error);
-      setLoadingTx(false);
+      const decimals2 = await contractTo.decimals();
+      const balance2 = await contractTo.balanceOf(address);
+      setBalanceTo(ethers.utils.formatUnits(balance2, decimals2));
     }
   };
 
-  const callSwap = async () => {
-    setLoadingTx(true);
-    const TxParams = {
-      ...txData,
-      gasLimit: txData.gas
-    };
-    delete TxParams.gas;
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const walletSigner = provider.getSigner(address);
-
-    try {
-      const transactionHash = await walletSigner.sendTransaction(TxParams);
-
-      enqueueSnackbar(
-        `Transaction has been submited. Tx hash: ${transactionHash.hash}`,
-        {
-          variant: "info",
-          autoHideDuration: 5000,
-          style: {
-            backgroundColor: "#202946"
-          }
-        }
-      );
-      const receipt = await transactionHash.wait();
-      setLoadingTx(false);
-      enqueueSnackbar(
-        `Transaction has been confirmed. Tx hash: ${receipt.transactionHash}`,
-        {
-          variant: "info",
-          autoHideDuration: 5000,
-          style: {
-            backgroundColor: "#202946"
-          }
-        }
-      );
-      getBalance();
-      getTokenBalance();
-    } catch (error) {
-      console.log(error);
-      setLoadingTx(false);
-    }
-  };
-  // get token list by chainId from 1inch
-  const getTokenList = async (chainId) => {
-    const API_URL = `https://api.1inch.io/v5.0/${chainId}/tokens/`;
-    const response = await fetch(API_URL);
-    const { tokens } = await response.json();
-    setTokenList(tokens);
-  };
   useEffect(() => {
     if (correctNetwork) {
       getBalance();
@@ -297,26 +188,12 @@ const SwapPage = () => {
       setBalance(0);
       setSellBalance("");
       setBuyBalance("");
-      initTradeInfo();
     }
   }, [tradeInfo, correctNetwork, chain]);
 
   useEffect(() => {
-    setallowanceError(false);
     if (sellBalance > 0 && correctNetwork) getQuote();
-  }, [sellBalance, tradeInfo, balanceFrom]);
-
-  useEffect(() => {
-    calculatePrice(sellBalance);
-  }, [balanceFrom]);
-
-  useEffect(() => {
-    getRouter();
-  }, []);
-
-  useEffect(() => {
-    getTokenList(chain.id);
-  }, [chain.id]);
+  }, [sellBalance, tradeInfo]);
 
   return (
     <>
@@ -349,12 +226,9 @@ const SwapPage = () => {
                         onClick={(e) => showModal("from")}
                       >
                         <img
-                          src={tradeInfo.from.logoURI}
+                          src={tradeInfo.from.icon}
                           alt='icon'
                           className='token-icon'
-                          onError={(element) => {
-                            addDefaultImg(element);
-                          }}
                         />
                         {tradeInfo.from.name}
                         <ArrowDropDownIcon />
@@ -404,22 +278,12 @@ const SwapPage = () => {
                         className='token-select'
                         onClick={(e) => showModal("to")}
                       >
-                        {tradeInfo.to.symbol ? (
-                          <>
-                            <img
-                              src={tradeInfo.to.logoURI}
-                              alt='icon'
-                              className='token-icon'
-                              onError={(element) => {
-                                addDefaultImg(element);
-                              }}
-                            />
-                            {tradeInfo.to.name}
-                          </>
-                        ) : (
-                          <span className='text-blue'>Select a Token</span>
-                        )}
-
+                        <img
+                          src={tradeInfo.to.icon}
+                          alt='icon'
+                          className='token-icon'
+                        />
+                        {tradeInfo.to.name}
                         <ArrowDropDownIcon />
                       </Button>
                       <InputBase
@@ -466,56 +330,45 @@ const SwapPage = () => {
                   </Typography>
                 </Grid>
                 <Grid item container justifyContent={"center"}>
-                  {allowanceError ? (
-                    <LoadingButton
-                      loading={loadingTx}
-                      variant='contained'
-                      fullWidth
-                      onClick={callApprove}
-                    >
-                      Approve
-                    </LoadingButton>
+                  {liquidityError ? (
+                    <Button variant='contained' disabled fullWidth>
+                      No liquidity for swap
+                    </Button>
                   ) : (
                     <>
-                      {liquidityError ? (
-                        <Button variant='contained' disabled fullWidth>
-                          No liquidity for swap
-                        </Button>
-                      ) : (
+                      {isConnected ? (
                         <>
-                          {isConnected ? (
-                            <>
-                              {balanceError || !Number(sellBalance) ? (
-                                <Button
-                                  variant='contained'
-                                  disabled
-                                  className='swap-button'
-                                  fullWidth
-                                >
-                                  {!balanceError
-                                    ? "SWAP"
-                                    : "Insufficient balance"}
-                                </Button>
-                              ) : (
-                                <Button
-                                  component={"button"}
-                                  variant='contained'
-                                  className='swap-button'
-                                  fullWidth
-                                  target={"_blank"}
-                                  disabled={loading}
-                                  onClick={callSwap}
-                                >
-                                  SWAP
-                                </Button>
-                              )}
-                            </>
+                          {!bestProtocal ||
+                          balanceError ||
+                          !Number(sellBalance) ? (
+                            <Button
+                              variant='contained'
+                              disabled
+                              className='swap-button'
+                              fullWidth
+                            >
+                              {!balanceError ? "SWAP" : "Insufficient balance"}
+                            </Button>
                           ) : (
-                            <Button variant='contained' disabled fullWidth>
-                              Connect Wallet
+                            <Button
+                              component={"button"}
+                              variant='contained'
+                              href={PROTOCOL_LIST[bestProtocal].url(
+                                tradeInfo.from.name,
+                                tradeInfo.to.contractAddress
+                              )}
+                              className='swap-button'
+                              fullWidth
+                              target={"_blank"}
+                            >
+                              SWAP
                             </Button>
                           )}
                         </>
+                      ) : (
+                        <Button variant='contained' disabled fullWidth>
+                          Connect Wallet
+                        </Button>
                       )}
                     </>
                   )}
@@ -543,9 +396,6 @@ const SwapPage = () => {
                                 src={PROTOCOL_LIST[element.protocol].icon}
                                 alt='icon'
                                 className='dex-icon'
-                                onError={(element) => {
-                                  addDefaultImg(element);
-                                }}
                               />
                               {PROTOCOL_LIST[element.protocol].name}
                             </td>
@@ -583,15 +433,12 @@ const SwapPage = () => {
           </Grid>
         </Container>
       </Grid>
-      (tokenList &&{" "}
       <TokenListModal
         modalOpen={modalOpen}
         closeModal={closeModal}
         modalKey={modalKey}
         changeBalance={changeBalance}
-        tokenList={tokenList}
       />
-      )
       <SlippageModal
         modalOpen={slippageModalOpen}
         closeModal={() => setSlippageModalOpen(false)}

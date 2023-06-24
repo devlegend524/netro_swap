@@ -1,2 +1,2 @@
-export { setWallet, setAssets } from './slices/wallet'
-export { setTradeFrom, setTradeTo } from './slices/trade'
+export { setWallet, setAssets } from "./slices/wallet";
+export { setTradeFrom, setTradeTo, initTradeInfo } from "./slices/trade";
