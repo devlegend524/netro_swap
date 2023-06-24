@@ -21,7 +21,7 @@ import TokenListModal from "../../components/TokenListModal";
 import ABI from "../../environment/ERC20_ABI.json";
 import Header from "../../components/Header/Header";
 import SlippageModal from "../../components/Slippage/SlippageModal";
-import { PROTOCOL_LIST, PROTOCOL_WHITE_LIST } from "../../environment/config";
+import { PROTOCOL_WHITE_LIST } from "../../environment/config";
 import "./styles.scss";
 import defaultImg from "../../assets/erc20.png";
 
@@ -32,7 +32,11 @@ const SwapPage = () => {
   const { chain } = useNetwork();
 
   const correctNetwork =
-    chain && (chain.id === 324 || chain.id === 42161 || chain.id === 10);
+    chain &&
+    (chain.id === 324 ||
+      chain.id === 42161 ||
+      chain.id === 10 ||
+      chain.id === 56);
 
   const { enqueueSnackbar } = useSnackbar();
   const [tokenList, setTokenList] = useState([]);
@@ -171,13 +175,16 @@ const SwapPage = () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const balance = await provider.getBalance(address);
     setBalance(ethers.utils.formatEther(balance));
-    if (tradeInfo.from.symbol === "ETH")
+    if (tradeInfo.from.address === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
       setBalanceFrom(ethers.utils.formatEther(balance));
   };
 
   const getTokenBalance = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    if (tradeInfo.from.symbol !== "ETH") {
+    if (
+      tradeInfo.from.address !== "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    ) {
+      console.log(tradeInfo.from.address);
       const contractFrom = new ethers.Contract(
         tradeInfo.from.address,
         ABI,
@@ -189,7 +196,9 @@ const SwapPage = () => {
     }
 
     if (tradeInfo.to.symbol !== "")
-      if (tradeInfo.to.symbol !== "ETH") {
+      if (
+        tradeInfo.to.address !== "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      ) {
         console.log("to token", tradeInfo.to);
         const contractTo = new ethers.Contract(
           tradeInfo.to.address,
@@ -292,6 +301,7 @@ const SwapPage = () => {
     const API_URL = `https://api.1inch.io/v5.0/${chainId}/tokens/`;
     const response = await fetch(API_URL);
     const { tokens } = await response.json();
+    console.log(tokens);
     setTokenList(tokens);
   };
   useEffect(() => {
@@ -318,19 +328,17 @@ const SwapPage = () => {
   }, [balanceFrom]);
 
   useEffect(() => {
+    if (correctNetwork) {
+      initTradeState(chain.id);
+      getTokenList(chain.id);
+    }
     getRouter();
   }, [chain]);
 
-  const initTradeState = () => {
+  const initTradeState = (chainID) => {
     console.log("dispatching action...");
-    dispatch(initTradeInfo());
+    dispatch(initTradeInfo(chainID));
   };
-  useEffect(() => {
-    if (correctNetwork) {
-      initTradeState();
-      getTokenList(chain.id);
-    }
-  }, [chain, dispatch]);
 
   return (
     <>
@@ -370,7 +378,7 @@ const SwapPage = () => {
                             addDefaultImg(element);
                           }}
                         />
-                        {tradeInfo.from.name}
+                        {tradeInfo.from.symbol}
                         <ArrowDropDownIcon />
                       </Button>
 
@@ -386,10 +394,11 @@ const SwapPage = () => {
                     <Grid container justifyContent={"space-between"}>
                       <Grid className='balance-text'>
                         Balance:{" "}
-                        {tradeInfo.from.name === "ETH"
+                        {tradeInfo.from.address ===
+                        "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
                           ? Number(balance).toFixed(5)
                           : Number(balanceFrom).toFixed(5)}{" "}
-                        {tradeInfo.from.name}
+                        {tradeInfo.from.symbol}
                       </Grid>
 
                       <Grid>
@@ -428,7 +437,7 @@ const SwapPage = () => {
                                 addDefaultImg(element);
                               }}
                             />
-                            {tradeInfo.to.name}
+                            {tradeInfo.to.symbol}
                           </>
                         ) : (
                           <span className='text-blue'>Select a Token</span>
@@ -446,10 +455,11 @@ const SwapPage = () => {
                     </Grid>
                     <Grid className='balance-text'>
                       Balance:{" "}
-                      {tradeInfo.to.name === "ETH"
+                      {tradeInfo.to.address ===
+                      "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
                         ? Number(balance).toFixed(5)
                         : Number(balanceTo).toFixed(5)}{" "}
-                      {tradeInfo.to.name}
+                      {tradeInfo.to.symbol}
                     </Grid>
                   </Box>
                 </Grid>
