@@ -29,7 +29,9 @@ const tradeSlice = createSlice({
       state.to = action.payload;
     },
     initTradeInfo: (state, action) => {
-      state = initialState;
+      console.log(initialState);
+      state.from = initialState.from;
+      state.to = initialState.to;
     }
   }
 });
