@@ -21,7 +21,7 @@ import TokenListModal from "../../components/TokenListModal";
 import ABI from "../../environment/ERC20_ABI.json";
 import Header from "../../components/Header/Header";
 import SlippageModal from "../../components/Slippage/SlippageModal";
-import { PROTOCOL_LIST } from "../../environment/config";
+import { PROTOCOL_LIST, PROTOCOL_WHITE_LIST } from "../../environment/config";
 import "./styles.scss";
 import defaultImg from "../../assets/erc20.png";
 
@@ -54,6 +54,7 @@ const SwapPage = () => {
   const [txData, setTxData] = useState(null);
   const [loadingTx, setLoadingTx] = useState(false);
   const [allowanceError, setallowanceError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const [pathResults, setPathResults] = useState([]);
 
   const showModal = (key) => {
@@ -125,7 +126,9 @@ const SwapPage = () => {
     const quoteData = await response.json();
     setLoading(false);
     if (quoteData.statusCode === 400) {
-      if (quoteData.meta[1].type === "allowance") setallowanceError(true);
+      setErrorMsg(quoteData.description);
+      if (quoteData.meta && quoteData.meta[1].type === "allowance")
+        setallowanceError(true);
       // setLiquidityError(true)
       // setUnknownPrice(true)
       setBuyBalance(0);
@@ -142,8 +145,11 @@ const SwapPage = () => {
       setEstimatedGas(quoteData.tx.gas);
     }
 
-    const pathAPI = `https://pathfinder.1inch.io/v1.4/chain/${chain.id}/router/v5/quotes?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&gasPrice=250000000&protocolWhiteList=ZKSYNC_MUTE,ZKSYNC_ONE_INCH_LIMIT_ORDER_V3,ZKSYNC_PMMX,ZKSYNC_SPACEFI,ZKSYNC_SYNCSWAP,ZKSYNC_GEM,ZKSYNC_MAVERICK_V1&preset=maxReturnResult&alternativeProtocols=ZKSYNC_MUTE,ZKSYNC_ONE_INCH_LIMIT_ORDER_V3,ZKSYNC_SPACEFI,ZKSYNC_SYNCSWAP,ZKSYNC_GEM,ZKSYNC_MAVERICK_V1`;
-
+    const pathAPI = `https://pathfinder.1inch.io/v1.4/chain/${
+      chain.id
+    }/router/v5/quotes?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&gasPrice=250000000&protocolWhiteList=${
+      PROTOCOL_WHITE_LIST[chain.id]
+    }&walletAddress=${address}&preset=maxReturnResult`;
     const pathResponse = await fetch(pathAPI);
     const pathResults = await pathResponse.json();
     console.log(pathResults);
@@ -459,7 +465,11 @@ const SwapPage = () => {
                       Unknown price <WarningAmberIcon></WarningAmberIcon>
                     </Typography>
                   )}
-
+                  {errorMsg && (
+                    <Typography className='unknown-price' textAlign={"right"}>
+                      errorMsg <WarningAmberIcon></WarningAmberIcon>
+                    </Typography>
+                  )}
                   <Typography className='exchange-rate' textAlign={"right"}>
                     {pairResult.length > 0 ? (
                       <>
@@ -546,15 +556,16 @@ const SwapPage = () => {
                         {pathResults.map((element, index) => (
                           <tr className='dex-item' key={index}>
                             <td className='dex-name'>
-                              <img
+                              {/* <img
                                 src={PROTOCOL_LIST[element.protocol].icon}
                                 alt='icon'
                                 className='dex-icon'
                                 onError={(element) => {
                                   addDefaultImg(element);
                                 }}
-                              />
-                              {PROTOCOL_LIST[element.protocol].name}
+                              /> */}
+                              {/* {PROTOCOL_LIST[element.protocol].name} */}
+                              {element.protocol}
                             </td>
                             <td>
                               {(
