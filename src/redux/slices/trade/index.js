@@ -29,8 +29,18 @@ const tradeSlice = createSlice({
       state.to = action.payload;
     },
     initTradeInfo: (state, action) => {
-      console.log(initialState);
-      state.from = initialState.from;
+      if (action.payload === 56) {
+        state.from = {
+          symbol: "BNB",
+          name: "BNB",
+          address: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          logoURI:
+            "https://tokens.1inch.io/0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c.png",
+          decimals: 18
+        };
+      } else {
+        state.from = initialState.from;
+      }
       state.to = initialState.to;
     }
   }

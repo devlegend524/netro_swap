@@ -12,7 +12,7 @@ import {
   darkTheme
 } from "@rainbow-me/rainbowkit";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
-import { zkSync, zkSyncTestnet, optimism, arbitrum } from "wagmi/chains";
+import { zkSync, zkSyncTestnet, optimism, arbitrum, bsc } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import store from "./redux/store";
@@ -22,7 +22,7 @@ import { theme } from "./styles/theme";
 const persistor = persistStore(store);
 
 const { chains, provider } = configureChains(
-  [zkSync, zkSyncTestnet, optimism, arbitrum],
+  [zkSync, zkSyncTestnet, optimism, arbitrum, bsc],
   [alchemyProvider({ apiKey: process.env.ALCHEMY_ID }), publicProvider()]
 );
 
