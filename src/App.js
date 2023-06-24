@@ -23,7 +23,7 @@ const persistor = persistStore(store);
 
 const { chains, provider } = configureChains(
   [zkSync, zkSyncTestnet, optimism, arbitrum],
-  [publicProvider()]
+  [alchemyProvider({ apiKey: process.env.ALCHEMY_ID }), publicProvider()]
 );
 
 const { connectors } = getDefaultWallets({

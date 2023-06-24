@@ -102,6 +102,7 @@ const SwapPage = () => {
   };
 
   const getRouter = async () => {
+    if (!chain) return;
     const API_URL = `https://api.1inch.io/v5.0/${chain.id}/approve/spender`;
     const response = await fetch(API_URL);
     const { address } = await response.json();
@@ -318,7 +319,7 @@ const SwapPage = () => {
 
   useEffect(() => {
     getRouter();
-  }, []);
+  }, [chain]);
 
   const initTradeState = () => {
     console.log("dispatching action...");
@@ -329,7 +330,7 @@ const SwapPage = () => {
       initTradeState();
       getTokenList(chain.id);
     }
-  }, [chain.id, dispatch]);
+  }, [chain, dispatch]);
 
   return (
     <>
@@ -601,15 +602,15 @@ const SwapPage = () => {
           </Grid>
         </Container>
       </Grid>
-      (tokenList &&{" "}
-      <TokenListModal
-        modalOpen={modalOpen}
-        closeModal={closeModal}
-        modalKey={modalKey}
-        changeBalance={changeBalance}
-        tokenList={tokenList}
-      />
-      )
+      {tokenList && (
+        <TokenListModal
+          modalOpen={modalOpen}
+          closeModal={closeModal}
+          modalKey={modalKey}
+          changeBalance={changeBalance}
+          tokenList={tokenList}
+        />
+      )}
       <SlippageModal
         modalOpen={slippageModalOpen}
         closeModal={() => setSlippageModalOpen(false)}
