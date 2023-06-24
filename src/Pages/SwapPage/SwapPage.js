@@ -27,7 +27,7 @@ import defaultImg from "../../assets/erc20.png";
 
 const SwapPage = () => {
   const dispatch = useDispatch();
-  const tradeInfo = useSelector((RootState) => RootState.trade);
+  let tradeInfo = useSelector((RootState) => RootState.trade);
   const { address, isConnected } = useAccount();
   const { chain } = useNetwork();
 
@@ -146,6 +146,7 @@ const SwapPage = () => {
 
     const pathResponse = await fetch(pathAPI);
     const pathResults = await pathResponse.json();
+    console.log(pathResults);
     if (pathResults.err) {
       setPathResults([]);
     } else {
@@ -297,9 +298,8 @@ const SwapPage = () => {
       setBalance(0);
       setSellBalance("");
       setBuyBalance("");
-      initTradeInfo();
     }
-  }, [tradeInfo, correctNetwork, chain]);
+  }, [tradeInfo, correctNetwork]);
 
   useEffect(() => {
     setallowanceError(false);
@@ -314,9 +314,16 @@ const SwapPage = () => {
     getRouter();
   }, []);
 
+  const initTradeState = () => {
+    console.log("dispatching action...");
+    dispatch(initTradeInfo());
+  };
   useEffect(() => {
-    getTokenList(chain.id);
-  }, [chain.id]);
+    if (correctNetwork) {
+      initTradeState();
+      getTokenList(chain.id);
+    }
+  }, [chain.id, dispatch]);
 
   return (
     <>
