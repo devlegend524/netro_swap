@@ -76,9 +76,11 @@ const StatsPage = () => {
     dispatch(initTradeInfo(chainID));
   };
   useEffect(() => {
-    getTVL(PROTOCOLS[chain.id]);
-    getDexTVL(PROTOCOLS[chain.id].toLowerCase());
-    initTradeState(chain.id);
+    getTVL(PROTOCOLS[chain ? chain.id : tradeInfo.chainId]);
+    getDexTVL(PROTOCOLS[chain ? chain.id : tradeInfo.chainId].toLowerCase());
+    if (chain) {
+      initTradeState(chain.id);
+    }
   }, [chain]);
   return (
     <>
@@ -211,15 +213,15 @@ const StatsPage = () => {
                             {data.displayName}
                           </td>
                           <td className={data.change_1d > 0 ? "up" : "down"}>
-                            ${convertCurrency(data.change_1d)}
+                            $ {convertCurrency(data.change_1d)}
                           </td>
                           <td className={data.change_7d > 0 ? "up" : "down"}>
-                            ${convertCurrency(data.change_7d)}
+                            $ {convertCurrency(data.change_7d)}
                           </td>
                           <td className={data.change_1m > 0 ? "up" : "down"}>
-                            ${convertCurrency(data.change_1m)}
+                            $ {convertCurrency(data.change_1m)}
                           </td>
-                          <td>${convertCurrency(data.totalAllTime)}</td>
+                          <td>$ {convertCurrency(data.totalAllTime)}</td>
                         </tr>
                       );
                     })}
