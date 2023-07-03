@@ -1,35 +1,40 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
-import FarmPage from '../Pages/FarmPage/FarmPage'
-import StatsPage from '../Pages/StatsPage/StatsPage'
-import SwapPage from '../Pages/SwapPage/SwapPage'
-import LaunchPad from '../Pages/LaunchPad/LaunchPad'
-import Airdrop from '../Pages/Airdrop/Airdrop'
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import FarmPage from "../Pages/FarmPage/FarmPage";
+import StatsPage from "../Pages/StatsPage/StatsPage";
+import SwapPage from "../Pages/SwapPage/SwapPage";
+import LaunchPad from "../Pages/LaunchPad/LaunchPad";
+import Airdrop from "../Pages/Airdrop/Airdrop";
+import DonatePage from "../Pages/Donate/DonatePage";
 
 const PageRouter = createBrowserRouter([
   {
-    path: '/swap',
+    path: "/swap",
     element: <SwapPage />,
   },
   {
-    path: '/stats',
+    path: "/stats",
     element: <StatsPage />,
   },
   {
-    path: '/farm',
+    path: "/donate",
+    element: <DonatePage />,
+  },
+  {
+    path: "/farm",
     element: <FarmPage />,
   },
   {
-    path: '/launchpad',
+    path: "/launchpad",
     element: <LaunchPad />,
   },
   {
-    path: '/airdrop',
+    path: "/airdrop",
     element: <Airdrop />,
   },
   {
-    path: '*',
+    path: "*",
     element: <Navigate to='/swap' replace />,
   },
-])
+]);
 
-export default PageRouter
+export default PageRouter;
