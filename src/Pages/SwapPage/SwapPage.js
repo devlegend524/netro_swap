@@ -6,7 +6,7 @@ import {
   Typography,
   Box,
   Button,
-  InputBase
+  InputBase,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -59,7 +59,8 @@ const SwapPage = () => {
   const [loadingTx, setLoadingTx] = useState(false);
   const [allowanceError, setallowanceError] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [pathResults, setPathResults] = useState([]);
+  const [pathResults, setPathResults] = useState(null);
+  const [protocols, setProtocols] = useState([]);
 
   const showModal = (key) => {
     setModalKey(key);
@@ -98,7 +99,7 @@ const SwapPage = () => {
     setEstimatedGas(0);
     setallowanceError(false);
     const oldOrder = {
-      ...tradeInfo
+      ...tradeInfo,
     };
 
     dispatch(setTradeFrom(oldOrder.to));
@@ -149,24 +150,36 @@ const SwapPage = () => {
       setBuyBalance(toTokenAmount);
       setEstimatedGas(quoteData.tx.gas);
     }
+    // https://api.1inch.io/v5.0/1/quote?
+    // const pathAPI = `https://pathfinder.1inch.io/v1.4/chain/${
+    const pathAPI = `https://api.1inch.io/v5.0/${chain.id}/quote?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}`;
 
-    const pathAPI = `https://pathfinder.1inch.io/v1.4/chain/${
-      chain.id
-    }/router/v5/quotes?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&gasPrice=250000000&protocolWhiteList=${
-      PROTOCOL_WHITE_LIST[chain.id]
-    }&walletAddress=${address}&preset=maxReturnResult`;
+    // const pathAPIv2 = `https://api.dexscreener.com/latest/dex/tokens/${fromTokenAddress},${toTokenAddress}`;
     const pathResponse = await fetch(pathAPI);
     const pathResults = await pathResponse.json();
+    console.log("pathResults: ");
     console.log(pathResults);
-    if (pathResults.err) {
-      setPathResults([]);
-    } else {
-      setPathResults(
-        pathResults.results.sort((a, b) => {
-          return b.toTokenAmount - a.toTokenAmount;
-        })
-      );
+    const bestProtocol = protocols.filter(
+      (protocol) => protocol.id === pathResults.protocols[0][0][0].name
+    );
+    console.log(bestProtocol.length);
+    if (bestProtocol.length > 0) {
+      const pathResult = {
+        id: bestProtocol[0].id,
+        img: bestProtocol[0].img,
+        img_color: bestProtocol[0].img_color,
+        title: bestProtocol[0].title,
+        toTokenAmount: pathResults.toTokenAmount,
+      };
+      setPathResults([pathResult]);
     }
+  };
+
+  const getProtocols = async () => {
+    const protocolAPI = `https://api.1inch.io/v5.0/${chain.id}/liquidity-sources`;
+    const protocolResponse = await fetch(protocolAPI);
+    const protocolList = await protocolResponse.json();
+    setProtocols(protocolList.protocols);
   };
   const addDefaultImg = (e) => {
     e.target.src = defaultImg;
@@ -199,7 +212,6 @@ const SwapPage = () => {
       if (
         tradeInfo.to.address !== "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
       ) {
-        console.log("to token", tradeInfo.to);
         const contractTo = new ethers.Contract(
           tradeInfo.to.address,
           ABI,
@@ -232,8 +244,8 @@ const SwapPage = () => {
         variant: "info",
         autoHideDuration: 5000,
         style: {
-          backgroundColor: "#202946"
-        }
+          backgroundColor: "#202946",
+        },
       });
       const receipt = await tx.wait();
       setLoadingTx(false);
@@ -243,8 +255,8 @@ const SwapPage = () => {
           variant: "info",
           autoHideDuration: 5000,
           style: {
-            backgroundColor: "#202946"
-          }
+            backgroundColor: "#202946",
+          },
         }
       );
       getQuote();
@@ -258,7 +270,7 @@ const SwapPage = () => {
     setLoadingTx(true);
     const TxParams = {
       ...txData,
-      gasLimit: txData.gas
+      gasLimit: txData.gas,
     };
     delete TxParams.gas;
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -273,8 +285,8 @@ const SwapPage = () => {
           variant: "info",
           autoHideDuration: 5000,
           style: {
-            backgroundColor: "#202946"
-          }
+            backgroundColor: "#202946",
+          },
         }
       );
       const receipt = await transactionHash.wait();
@@ -285,8 +297,8 @@ const SwapPage = () => {
           variant: "info",
           autoHideDuration: 5000,
           style: {
-            backgroundColor: "#202946"
-          }
+            backgroundColor: "#202946",
+          },
         }
       );
       getBalance();
@@ -301,9 +313,13 @@ const SwapPage = () => {
     const API_URL = `https://api.1inch.io/v5.0/${chainId}/tokens/`;
     const response = await fetch(API_URL);
     const { tokens } = await response.json();
-    console.log(tokens);
     setTokenList(tokens);
   };
+
+  useEffect(() => {
+    getProtocols();
+  }, []);
+
   useEffect(() => {
     if (correctNetwork) {
       getBalance();
@@ -331,15 +347,20 @@ const SwapPage = () => {
     if (correctNetwork) {
       initTradeState(chain.id);
       getTokenList(chain.id);
+      setpairResult([]);
+      setBalanceFrom(0);
+      setBalanceTo(0);
+      setBalance(0);
+      setSellBalance("");
+      setBuyBalance("");
     }
     getRouter();
   }, [chain]);
 
   const initTradeState = (chainID) => {
-    console.log("dispatching action...");
     dispatch(initTradeInfo(chainID));
   };
-
+  console.log(pathResults);
   return (
     <>
       <Grid className={modalOpen || slippageModalOpen ? "blur-background" : ""}>
@@ -567,16 +588,15 @@ const SwapPage = () => {
                         {pathResults.map((element, index) => (
                           <tr className='dex-item' key={index}>
                             <td className='dex-name'>
-                              {/* <img
-                                src={PROTOCOL_LIST[element.protocol].icon}
+                              <img
+                                src={element.img}
                                 alt='icon'
                                 className='dex-icon'
                                 onError={(element) => {
                                   addDefaultImg(element);
                                 }}
-                              /> */}
-                              {/* {PROTOCOL_LIST[element.protocol].name} */}
-                              {element.protocol}
+                              />
+                              {element.title}
                             </td>
                             <td>
                               {(
