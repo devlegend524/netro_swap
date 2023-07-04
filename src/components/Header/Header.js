@@ -68,7 +68,7 @@ const Header = () => {
                 <Link
                   to={"/donate"}
                   className={
-                    location.pathname === "/stats"
+                    location.pathname === "/donate"
                       ? "nav-link active"
                       : "nav-link"
                   }

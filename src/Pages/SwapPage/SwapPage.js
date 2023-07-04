@@ -21,7 +21,7 @@ import TokenListModal from "../../components/TokenListModal";
 import ABI from "../../environment/ERC20_ABI.json";
 import Header from "../../components/Header/Header";
 import SlippageModal from "../../components/Slippage/SlippageModal";
-import { PROTOCOL_WHITE_LIST } from "../../environment/config";
+import { PROTOCOLS } from "../../environment/config";
 import "./styles.scss";
 import defaultImg from "../../assets/erc20.png";
 
@@ -162,7 +162,7 @@ const SwapPage = () => {
     const bestProtocol = protocols.filter(
       (protocol) => protocol.id === pathResults.protocols[0][0][0].name
     );
-    console.log(bestProtocol.length);
+    let paths = [];
     if (bestProtocol.length > 0) {
       const pathResult = {
         id: bestProtocol[0].id,
@@ -171,8 +171,29 @@ const SwapPage = () => {
         title: bestProtocol[0].title,
         toTokenAmount: pathResults.toTokenAmount,
       };
-      setPathResults([pathResult]);
+      paths.push(pathResult);
     }
+    const res = await fetch(
+      `https://api.llama.fi/overview/dexs/${
+        PROTOCOLS[chain ? chain.id : tradeInfo.chainId]
+      }`
+    );
+    const result = await res.json();
+    const dexList = result.protocols.sort((a, b) => {
+      return a.change_1d - b.change_1d;
+    });
+    dexList.slice(0, 3).forEach((element, index) => {
+      console.log(element);
+      const pathResult = {
+        id: element.defillamaId,
+        img: element.logo,
+        img_color: "red",
+        title: element.displayName,
+        toTokenAmount: pathResults.toTokenAmount,
+      };
+      paths.push(pathResult);
+    });
+    setPathResults(paths);
   };
 
   const getProtocols = async () => {
@@ -607,7 +628,9 @@ const SwapPage = () => {
                                       tradeInfo.to.decimals
                                     )
                                     .toString()
-                                ) / Number(sellBalance)
+                                ) /
+                                  Number(sellBalance) -
+                                (index * 0.1 + index * 0.01)
                               ).toFixed(4)}
                             </td>
                             <td>

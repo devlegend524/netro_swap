@@ -10,8 +10,14 @@ import qrCode from "../../assets/qrcode.png";
 import copyImg from "../../assets/copy.svg";
 
 const DonatePage = () => {
+  const [address, setAddress] = useState(
+    "0xCf2BeeDeE13Be9A35cda503d21266840b7ED36AA"
+  );
   const [message, setMessage] = useState("Copy Address");
-
+  const setCopy = () => {
+    navigator.clipboard.writeText(address);
+    setMessage("Copied!");
+  };
   return (
     <>
       <Header />
@@ -30,9 +36,9 @@ const DonatePage = () => {
                   <img src={qrCode} alt='qrcode' />
                 </Typography>
                 <Typography variant='h6' align='center'>
-                  0x39E539678AA0AF3738F498d936737ce51052C6aa{" "}
+                  {address}
                   <CopyToClipboard
-                    onCopy={() => setMessage("Copied!")}
+                    onCopy={() => setCopy()}
                     data-tooltip-id='copyAddress'
                     data-tooltip-content={message}
                   >
